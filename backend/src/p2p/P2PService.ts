@@ -1,0 +1,78 @@
+import { createLibp2p } from 'libp2p';
+import { WebRTCStar } from '@libp2p/webrtc-star';
+import { Noise } from '@chainsafe/libp2p-noise';
+import { Mplex } from '@libp2p/mplex';
+import type { Connection } from '@libp2p/interface-connection';
+import type { PeerId } from '@libp2p/interface-peer-id';
+import EventEmitter from 'events';
+
+export class P2PService extends EventEmitter {
+  private node: any;
+  private connections: Map<string, Connection>;
+
+  constructor() {
+    super();
+    this.connections = new Map();
+  }
+
+  async initialize() {
+    this.node = await createLibp2p({
+      addresses: {
+        listen: ['/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star']
+      },
+      transports: [new WebRTCStar()],
+      connectionEncryption: [new Noise()],
+      streamMuxers: [new Mplex()],
+    });
+
+    await this.node.start();
+
+    this.node.connectionManager.on('peer:connect', this.handlePeerConnect.bind(this));
+    this.node.connectionManager.on('peer:disconnect', this.handlePeerDisconnect.bind(this));
+
+    return this.node.peerId.toString();
+  }
+
+  private handlePeerConnect(connection: Connection) {
+    const peerId = connection.remotePeer.toString();
+    this.connections.set(peerId, connection);
+    this.emit('peer:connect', peerId);
+  }
+
+  private handlePeerDisconnect(connection: Connection) {
+    const peerId = connection.remotePeer.toString();
+    this.connections.delete(peerId);
+    this.emit('peer:disconnect', peerId);
+  }
+
+  async connectToPeer(peerId: string) {
+    try {
+      const connection = await this.node.dial(PeerId.createFromB58String(peerId));
+      this.connections.set(peerId, connection);
+      return true;
+    } catch (error) {
+      console.error('Failed to connect to peer:', error);
+      return false;
+    }
+  }
+
+  async sendMessage(peerId: string, message: any) {
+    const connection = this.connections.get(peerId);
+    if (!connection) {
+      throw new Error('No connection to peer');
+    }
+
+    const stream = await connection.newStream('/chat/1.0.0');
+    await stream.sink([Buffer.from(JSON.stringify(message))]);
+  }
+
+  async stop() {
+    if (this.node) {
+      await this.node.stop();
+    }
+  }
+
+  getConnectedPeers(): string[] {
+    return Array.from(this.connections.keys());
+  }
+}
