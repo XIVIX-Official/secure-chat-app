@@ -20,6 +20,8 @@ secure-chat-app/
 ├── .gitignore              # Git ignore rules
 ├── LICENSE                 # Project license
 ├── README.md              # This file
+├── start.bat
+├── cleanup.bat
 │
 ├── backend/               # Backend services
 │   ├── src/
@@ -122,6 +124,32 @@ secure-chat-app/
 
 5. **Open your browser**
    Navigate to `http://localhost:5173` (or the URL shown in your terminal)
+
+### Without step 2, 3, 4, and 5(the easiest way): Using Environment Scripts
+
+The project includes two utility scripts to help manage your development environment:
+
+#### cleanup.bat
+This script helps clean up your development environment:
+```batch
+cleanup.bat
+```
+
+Use this script when:
+- You want to do a clean reinstall
+- You're experiencing dependency conflicts
+- You want to reset your development environment
+
+#### start.bat
+This script automates the project startup process:
+```batch
+start.bat
+```
+
+Use this script to:
+- Start the development environment
+- Ensure all dependencies are properly installed
+- Launch both backend and frontend servers
 
 ## 💬 Usage
 
