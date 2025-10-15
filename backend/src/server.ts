@@ -46,8 +46,8 @@ io.on('connection', (socket) => {
     try {
       const peerId = await p2pService.initialize();
       callback({ success: true, peerId });
-    } catch (error) {
-      callback({ success: false, error: error.message });
+    } catch (error: any) {
+      callback({ success: false, error: error?.message || 'Failed to join network' });
     }
   });
 
@@ -55,8 +55,8 @@ io.on('connection', (socket) => {
     try {
       const success = await p2pService.connectToPeer(peerId);
       callback({ success });
-    } catch (error) {
-      callback({ success: false, error: error.message });
+    } catch (error: any) {
+      callback({ success: false, error: error?.message || 'Failed to connect to peer' });
     }
   });
 
@@ -68,8 +68,8 @@ io.on('connection', (socket) => {
         timestamp: Date.now()
       });
       callback({ success: true });
-    } catch (error) {
-      callback({ success: false, error: error.message });
+    } catch (error: any) {
+      callback({ success: false, error: error?.message || 'Failed to send message' });
     }
   });
 

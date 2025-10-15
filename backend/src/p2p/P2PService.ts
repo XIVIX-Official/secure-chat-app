@@ -1,9 +1,9 @@
 import { createLibp2p } from 'libp2p';
-import { WebRTCStar } from '@libp2p/webrtc-star';
-import { Noise } from '@chainsafe/libp2p-noise';
-import { Mplex } from '@libp2p/mplex';
+import { webRTCStar } from '@libp2p/webrtc-star';
+import { noise } from '@chainsafe/libp2p-noise';
+import { mplex } from '@libp2p/mplex';
 import type { Connection } from '@libp2p/interface-connection';
-import type { PeerId } from '@libp2p/interface-peer-id';
+import { createFromB58String } from '@libp2p/peer-id';
 import EventEmitter from 'events';
 
 export class P2PService extends EventEmitter {
@@ -20,9 +20,9 @@ export class P2PService extends EventEmitter {
       addresses: {
         listen: ['/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star']
       },
-      transports: [new WebRTCStar()],
-      connectionEncryption: [new Noise()],
-      streamMuxers: [new Mplex()],
+      transports: [webRTCStar()],
+      connectionEncrypters: [noise()],
+      streamMuxers: [mplex()],
     });
 
     await this.node.start();
